@@ -7,7 +7,7 @@ import {registerAppTool,registerAppResource,RESOURCE_MIME_TYPE} from '@modelcont
 import {observeCapabilities} from './evolution.mjs';
 import {MirrorManager} from './mirror.mjs';
 import {quarrySearch,quarryUpstream} from './quarry.mjs';
-import {captureChange,assessProjection,intervene,reconstruct} from './semantic.mjs';
+import {captureChange,assessProjection,intervene,reconstruct,reproject} from './semantic.mjs';
 import {saveSemanticReceipt,loadSemanticReceipt} from './semantic-journal.mjs';
 const UI='ui://codeberg-transition/dashboard.html';
 const respond=async(task)=>{
@@ -131,6 +131,13 @@ export function registerTools(server,api,planner){
  }),async ({receiptId})=>{
   const projection=await loadSemanticReceipt(api.c.stateDir,receiptId);
   return {projection,reconstruction:reconstruct(projection)};
+ });
+ tool('codeberg_semantic_reproject','Reuse the original evidence and separately marked AI interpretations to target a different forge without inventing native review decisions. Read-only.',z.object({
+  receiptId:z.string().regex(/^[a-f0-9]{64}$/),
+  target:semanticTarget
+ }),async ({receiptId,target})=>{
+  const old=await loadSemanticReceipt(api.c.stateDir,receiptId);
+  return reproject(old,target);
  });
  registerAppTool(server,'codeberg_migration_dashboard',{
   title:'Codeberg Transition Console',
