@@ -8,6 +8,7 @@ export function loadConfig(env = process.env) {
     codebergToken: env.CODEBERG_TOKEN || '',
     githubToken: env.GITHUB_TOKEN || '',
     migrationToken: env.GITHUB_MIGRATE_TOKEN || '',
+    mirrorToken: env.GITHUB_MIRROR_TOKEN || '',
     host: env.MCP_BIND_HOST || '127.0.0.1',
     port: Number(env.MCP_PORT || 8767),
     gatewayToken: env.MCP_GATEWAY_TOKEN || '',
