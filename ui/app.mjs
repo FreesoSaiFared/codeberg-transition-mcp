@@ -201,6 +201,117 @@ async function checkSourceDrift(){
 $('quarry-search').addEventListener('click',searchSources);
 $('quarry-upstream').addEventListener('click',checkSourceDrift);
 $('quarry-query').addEventListener('keydown',e=>{if(e.key==='Enter')void searchSources();});
+const semanticExample={
+ provider:'gerrit',repository:'example/engineering',changeId:'I12345',
+ sourceUrl:'https://review.example.org/c/engineering/+/42',
+ title:'Repair sharded scheduler',description:'Keep retry ordering consistent.',
+ facts:[
+  {sourceId:'patchset-3',kind:'patch_set',value:{patchSet:3,commit:'abc123'},
+   sourceLocator:'https://review.example.org/c/engineering/+/42/3'},
+  {sourceId:'vote-8',kind:'numeric_review_vote',value:{label:'Code-Review',vote:2},
+   actor:{provider:'gerrit',username:'alice',asserted:true},
+   sourceLocator:'https://review.example.org/c/engineering/+/42#vote-8'},
+  {sourceId:'thread-10',kind:'review_thread',value:{resolved:true,text:'Retry ordering race'},
+   sourceLocator:'https://review.example.org/c/engineering/+/42/3#thread-10'}
+ ]
+};
+$('semantic-source').value=JSON.stringify(semanticExample,null,2);
+let semanticState=null,semanticSource=null,semanticReceipt=null;
+const semanticMsg=text=>$('semantic-status').textContent=text;
+function semanticButtons(){
+ $('semantic-ai').disabled=!semanticState;
+ $('semantic-save').disabled=!semanticState;
+ $('semantic-reproject').disabled=!semanticReceipt;
+}
+function renderSemantic(result){
+ semanticState=result;
+ const node=$('semantic-loss');
+ node.replaceChildren();
+ const totals=result.lossReport;
+ const row=document.createElement('div');
+ row.className='semantic-row';
+ for(const title of ['SOURCE FACT','NATIVE EQUIVALENCE','PRESERVATION ROUTE']){
+  const cell=document.createElement('span');cell.textContent=title;row.appendChild(cell);
+ }node.appendChild(row);
+ for(const fact of [...result.nativeEvents.map(e=>({kind:e.kind,id:e.sourceId,route:'native',covered:true})),
+   ...result.gaps.map(e=>({kind:e.kind,id:e.sourceId,route:e.proposedRoute,covered:false}))]){
+  const r=document.createElement('div');r.className='semantic-row';
+  for(const txt of [fact.kind+' / '+fact.id,fact.covered?'NATIVE (UNVERIFIED)':'GAP',
+   fact.covered?'PROVIDER FIELD':fact.route.toUpperCase()]){
+   const cell=document.createElement('span');cell.textContent=txt;r.appendChild(cell);
+  }node.appendChild(r);
+ }
+ semanticMsg(totals.native+' native categories · '+totals.unsupported+
+  ' absent from destination · all '+totals.totalFacts+' facts retained as evidence. '+
+  'No original approvals, identities or merge decisions have been altered.');
+ semanticButtons();
+}
+async function previewSemantic(){
+ $('semantic-preview').disabled=true;
+ try{
+  semanticSource=JSON.parse($('semantic-source').value);
+  semanticReceipt=null;
+  $('semantic-receipt').textContent='NO SIDECAR STORED';
+  const result=await call('codeberg_semantic_preview',{
+   source:semanticSource,target:$('semantic-target').value
+  });
+  renderSemantic(result);
+ }catch(e){semanticState=null;semanticMsg('Cannot preview: '+e.message);}
+ finally{$('semantic-preview').disabled=false;semanticButtons();}
+}
+async function saveSemantic(){
+ if(!semanticState||!semanticSource)return;
+ $('semantic-save').disabled=true;
+ try{
+  const r=await call('codeberg_semantic_intervene',{
+   source:semanticSource,target:$('semantic-target').value,inferences:[],saveReceipt:true
+  });
+  semanticReceipt=r.receipt?.receiptId||null;
+  $('semantic-receipt').textContent=semanticReceipt||'NOT SAVED';
+  semanticMsg('Original source evidence saved locally on MCP host. AI hypotheses: 0. '+
+   'No GitHub, Codeberg, or other forge object was changed.');
+ }catch(e){semanticMsg('Cannot save evidence: '+e.message);}
+ finally{semanticButtons();}
+}
+async function askSemanticAI(){
+ if(!semanticState||!semanticSource)return;
+ $('semantic-ai').disabled=true;
+ try{
+  const context=JSON.stringify({source:semanticSource,target:semanticState.target,
+   gaps:semanticState.gaps,lossReport:semanticState.lossReport});
+  if(context.length>20000)throw Error('Evidence exceeds chat context limit. Trim example or ask from the conversation.');
+  const instruction='Analyze this forge change translation using semantic continuity rather than a universal pull-request schema. '+
+   'For each gap, infer useful alternative representation (comment, description, linked issue, sidecar), anticipate downstream needs, '+
+   'and distinguish confirmed evidence from AI hypotheses. Cite supplied sourceId values. '+
+   'If useful, call codeberg_semantic_intervene with this exact source change, target and evidence-backed inferences, '+
+   'then report the immutable receipt. NEVER invent an approval, original identity, CI result or merge decision.\n'+context;
+  const result=await app.sendMessage({role:'user',content:[{type:'text',text:instruction}]});
+  if(result?.isError)throw Error('ChatGPT declined message');
+  semanticMsg('Inference request sent to the ChatGPT conversation. Await its response; the original evidence remains unchanged.');
+ }catch(e){semanticMsg('Could not request AI intervention: '+e.message);}
+ finally{semanticButtons();}
+}
+async function reprojectSemantic(){
+ if(!semanticReceipt)return;
+ $('semantic-reproject').disabled=true;
+ try{
+  const r=await call('codeberg_semantic_reproject',{
+   receiptId:semanticReceipt,target:$('semantic-target').value
+  });
+  renderSemantic(r);
+  semanticMsg('Reprojected original facts to '+r.target+'. Earlier AI interpretations are still hypotheses, not native actions.');
+ }catch(e){semanticMsg('Could not reproject: '+e.message);}
+ finally{semanticButtons();}
+}
+$('semantic-preview').addEventListener('click',previewSemantic);
+$('semantic-save').addEventListener('click',saveSemantic);
+$('semantic-ai').addEventListener('click',askSemanticAI);
+$('semantic-reproject').addEventListener('click',reprojectSemantic);
+$('semantic-source').addEventListener('input',()=>{
+ semanticState=null;semanticSource=null;semanticReceipt=null;
+ $('semantic-receipt').textContent='PREVIEW REQUIRED AFTER EDIT';
+ semanticButtons();
+});
 $('preview').addEventListener('click',preview);
 $('refresh').addEventListener('click',refresh);
 $('execute').addEventListener('click',execute);
