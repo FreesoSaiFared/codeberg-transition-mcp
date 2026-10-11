@@ -1,0 +1,121 @@
+{
+  "schema": "source-quarry/v1",
+  "quarriedAt": "2026-10-11",
+  "intent": "Codeberg is the canonical editable forge, GitHub and others are outward projections plus contribution intake",
+  "licenseRule": "Do not copy AGPL/GPL code into MIT project without licensing decision; reuse techniques and call tools as dependencies.",
+  "sources": [
+    {
+      "id": "eleboucher-forgesync",
+      "repo": "eleboucher/forgesync",
+      "license": "MIT",
+      "focus": "bidirectional-issue-comment-shadow-and-pr-promotion",
+      "read": [
+        "internal/marker/marker.go",
+        "internal/syncloop/syncloop.go",
+        "internal/gitops/gitops.go"
+      ],
+      "evidence": "source-checked",
+      "reuse": "Marker identity, loop suppression, inbound GitHub PR promotion, two-direction issue/comment reconciliation.",
+      "limits": "The Git push --mirror interaction can delete target-only refs; caution for same-repo GitHub PRs.",
+      "priority": "P0"
+    },
+    {
+      "id": "lukaswrz-forgesync",
+      "repo": "lukaswrz/forgesync",
+      "license": "AGPL-3.0",
+      "focus": "forgejo-to-github-provisioning-and-metadata",
+      "read": [
+        "src/forgesync/mirror.py",
+        "src/forgesync/sync.py",
+        "src/forgesync/github.py"
+      ],
+      "evidence": "source-checked",
+      "reuse": "Automated destination creation, repository descriptions/topics, on-commit push-mirror orchestration.",
+      "limits": "Repo feature toggles are not issue/comment or PR conversation copies; overlapping destination names may overwrite.",
+      "priority": "P0"
+    },
+    {
+      "id": "raylabs-gitea-mirror",
+      "repo": "RayLabsHQ/gitea-mirror",
+      "license": "AGPL-3.0",
+      "focus": "multi-source-multi-target-git-transfer-and-github-metadata",
+      "read": [
+        "README.md",
+        "https://gitea-mirror.raylabs.io/docs/sources/",
+        "https://gitea-mirror.raylabs.io/docs/destinations/"
+      ],
+      "evidence": "official-docs-checked",
+      "reuse": "Multi-provider matrix, source-specific capabilities, scheduled backups, partial incremental metadata import.",
+      "limits": "Default supported path is GitHub to Gitea; other source/target combos beta, only GitHub source offers issues and PR metadata.",
+      "priority": "P0"
+    },
+    {
+      "id": "trapexit-github-forgejo",
+      "repo": "trapexit/sync-github-to-forgejo",
+      "license": null,
+      "focus": "github-to-forgejo-dry-run-mirror",
+      "read": [
+        "README.md"
+      ],
+      "evidence": "repo-readme-checked",
+      "reuse": "Simple dependency-free Python inventory with dry run, per-repo error handling, exclusion filters.",
+      "limits": "Not a general two-way issue or pull-request translator.",
+      "priority": "P2"
+    },
+    {
+      "id": "patnei-github2forgejo",
+      "repo": "PatNei/GITHUB2FORGEJO",
+      "license": "GPL-3.0",
+      "focus": "github-migration-push-pull-and-selection",
+      "read": [
+        "README.md",
+        "test/strategy.bats"
+      ],
+      "evidence": "repo-readme-checked",
+      "reuse": "Selectable clone/pull-mirror/push-mirror strategy and user/org distinction with tests.",
+      "limits": "Cleanup can delete target repos when enabled; mirror mode Forgejo >=v15 advised by author.",
+      "priority": "P1"
+    },
+    {
+      "id": "kindofabuzz-forgejo-to-github",
+      "repo": "kindofabuzz/forgejo-to-github",
+      "license": "NOASSERTION",
+      "focus": "repository-bootstrap-and-push-mirror",
+      "read": [
+        "README.md"
+      ],
+      "evidence": "repo-readme-checked",
+      "reuse": "Language-template + dual repository bootstrap and push-mirror setup.",
+      "limits": "README does not demonstrate translating native GitHub PRs into Forgejo PRs; existing destination is not checked.",
+      "priority": "P2"
+    },
+    {
+      "id": "plane-forge-bridge",
+      "repo": "hstern/plane-forge-bridge",
+      "license": "MIT",
+      "focus": "cross-system-webhook-issues-and-work-item-sync",
+      "read": [
+        "README.md",
+        "docs/design.md"
+      ],
+      "evidence": "repo-readme-checked",
+      "reuse": "HMAC webhook gates, loop-break markers, idempotence cache, identity mapping, test matrix.",
+      "limits": "Plane is a work tracker, not another forge; several comment edits and reverse features explicitly deferred.",
+      "priority": "P1"
+    },
+    {
+      "id": "forgejo-7556",
+      "url": "https://codeberg.org/forgejo/forgejo/issues/7556",
+      "license": null,
+      "focus": "two-way-forge-mirroring-feature-request",
+      "read": [
+        "https://codeberg.org/api/v1/repos/forgejo/forgejo/issues/7556"
+      ],
+      "evidence": "live-codeberg-api-checked",
+      "state": "open",
+      "reuse": "Requirement checklist for Git, issues, PRs, identities, permissions, CI and deprecation.",
+      "limits": "Proposal only; 0 comments at inspection, not implemented architecture.",
+      "priority": "P0"
+    }
+  ]
+}
