@@ -1,0 +1,39 @@
+{
+  "id": "codeberg-to-github-push-mirror",
+  "title": "Codeberg primary, GitHub publication mirror",
+  "source": {
+    "url": "https://kaksikoivua.hashnode.dev/setting-up-a-push-mirror-from-codeberg-to-github",
+    "title": "Setting up a push mirror from Codeberg to GitHub",
+    "author": "Kaksi Koivua",
+    "updated": "2023-01-12",
+    "ingested": "2026-10-11"
+  },
+  "intent": "Codeberg is writable source of truth; GitHub receives pushes.",
+  "steps": [
+    {"id": 1, "ui": "GitHub Developer settings", "action": "navigate", "url": "https://github.com/settings/tokens", "verify": "Personal access tokens visible"},
+    {"id": 2, "ui": "Personal access tokens", "action": "select", "target": "Personal access tokens", "verify": "Token creation interface visible"},
+    {"id": 3, "ui": "Tokens (classic)", "action": "select", "target": "Tokens (classic)", "verify": "Classic token management visible"},
+    {"id": 4, "ui": "Generate new token", "action": "select", "target": "Generate new token", "verify": "New token choices visible"},
+    {"id": 5, "ui": "Generate new token (classic)", "action": "select", "target": "Generate new token (classic)", "verify": "Scope selector visible"},
+    {"id": 6, "ui": "Token scopes", "action": "configure", "target": "public_repo", "verify": "Token can push to intended public GitHub repository"},
+    {"id": 7, "ui": "Token secret", "action": "store_secret", "target": "GITHUB_MIRROR_TOKEN", "verify": "Secret stored on private MCP host; not exposed to ChatGPT or commit history"},
+    {"id": 8, "ui": "GitHub repository", "action": "ensure_repository", "target": "GitHub user/repo", "verify": "Repository exists and is owned by intended user"},
+    {"id": 9, "ui": "Codeberg repository settings", "action": "navigate", "url_template": "https://codeberg.org/{owner}/{repo}/settings", "target": "Git Remote Repository URL", "verify": "GitHub remote matches https://github.com/{githubOwner}/{repo}.git"},
+    {"id": 10, "ui": "Authorization", "action": "open", "target": "Authorization", "verify": "Credential fields visible"},
+    {"id": 11, "ui": "Username and password", "action": "set_credentials", "target": "GitHub username and dedicated token", "verify": "Token is sent only to Codeberg push-mirror API"},
+    {"id": 12, "ui": "Mirror options", "action": "enable", "target": "Sync when new commits are pushed; Add Push Mirror", "verify": "Codeberg GET push_mirrors lists GitHub URL and sync_on_commit=true"}
+  ],
+  "api_equivalent": {
+    "method": "POST",
+    "path": "/api/v1/repos/{owner}/{repo}/push_mirrors",
+    "fields": ["remote_address", "remote_username", "remote_password", "sync_on_commit"],
+    "readback": "GET /api/v1/repos/{owner}/{repo}/push_mirrors",
+    "manual_sync": "POST /api/v1/repos/{owner}/{repo}/push_mirrors-sync"
+  },
+  "execution_contract": {
+    "primary": "authenticated Forgejo REST API",
+    "fallback": "ABP browser UI actions using recipe steps, with readback",
+    "never": ["embed token in URL", "expose token in prompts", "overwrite diverged target without explicit repair", "delete GitHub source"],
+    "receipt": ["source", "target", "sync_on_commit", "remote", "last_update", "last_error", "commit_sha"]
+  }
+}
