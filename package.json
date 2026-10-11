@@ -1,0 +1,22 @@
+{
+  "name": "codeberg-transition-mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "ChatGPT MCP App for auditable GitHub-to-Codeberg migration",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check src/server.mjs && node --check src/api.mjs && node --check src/planner.mjs && node --check src/doctor.mjs",
+    "doctor": "node src/doctor.mjs",
+    "ui:build": "esbuild ui/app.mjs --bundle --format=iife --target=es2022 --outfile=ui/app.bundle.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.3.1",
+    "@modelcontextprotocol/node": "^2.3.1",
+    "@modelcontextprotocol/ext-apps": "^2.0.3",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {"esbuild": "^0.25.0"}
+}
