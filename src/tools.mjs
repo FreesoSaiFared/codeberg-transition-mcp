@@ -7,6 +7,8 @@ import {registerAppTool,registerAppResource,RESOURCE_MIME_TYPE} from '@modelcont
 import {observeCapabilities} from './evolution.mjs';
 import {MirrorManager} from './mirror.mjs';
 import {quarrySearch,quarryUpstream} from './quarry.mjs';
+import {captureChange,assessProjection,intervene,reconstruct} from './semantic.mjs';
+import {saveSemanticReceipt,loadSemanticReceipt} from './semantic-journal.mjs';
 const UI='ui://codeberg-transition/dashboard.html';
 const respond=async(task)=>{
  try{
@@ -97,6 +99,39 @@ export function registerTools(server,api,planner){
  tool('codeberg_push_mirror_sync','Trigger Codeberg push mirror sync for an existing repository. This sends Codeberg Git refs to GitHub.',z.object({
   owner:z.string(),repo:z.string()
  }),({owner,repo})=>mirrors.sync(owner,repo),true);
+ const semanticSource=z.object({
+  provider:z.string().min(1).max(50),repository:z.string().min(1).max(250),
+  changeId:z.union([z.string(),z.number()]),
+  sourceUrl:z.string().url(),title:z.string().min(1).max(300),
+  description:z.string().max(100000).optional(),
+  facts:z.array(z.any()).max(1000).default([])
+ });
+ const semanticTarget=z.enum(['github','forgejo','gitlab','gerrit','sourcehut','minimal']);
+ const aiInference=z.object({
+  type:z.enum(['semantic_summary','review_intent','missing_context','anticipated_workflow',
+   'identity_candidate','review_anchor','relationship','risk']),
+  claim:z.string().min(1).max(3000),basedOn:z.array(z.string()).min(1),
+  confidence:z.number().min(0).max(1),
+  route:z.enum(['native_note','linked_issue','sidecar','description']).optional(),
+  nativeAction:z.string().optional()
+ });
+ tool('codeberg_semantic_preview','AI-mediated semantic interoperability: capture an evidence-linked change, preview which review/PR facts the target forge cannot represent, suggest alternative fields and retain all originals in a sidecar. No external writes.',z.object({
+  source:semanticSource,target:semanticTarget
+ }),({source,target})=>assessProjection(captureChange(source),target));
+ tool('codeberg_semantic_intervene','Attach AI hypotheses to source evidence and retain semantic gaps in a checksum-verified private sidecar. AI guesses NEVER become native approvals, identity proofs, CI results or merges.',z.object({
+  source:semanticSource,target:semanticTarget,
+  inferences:z.array(aiInference).max(100),saveReceipt:z.boolean().default(true)
+ }),async ({source,target,inferences,saveReceipt})=>{
+  const projection=intervene(assessProjection(captureChange(source),target),inferences);
+  const receipt=saveReceipt?await saveSemanticReceipt(api.c.stateDir,projection):null;
+  return {projection,receipt};
+ },true);
+ tool('codeberg_semantic_receipt','Read a previously saved evidence-complete translation and verify its checksums, separating AI inferences from original source facts.',z.object({
+  receiptId:z.string().length(64).regex(/^[a-f0-9]+$/)
+ }),async ({receiptId})=>{
+  const projection=await loadSemanticReceipt(api.c.stateDir,receiptId);
+  return {projection,reconstruction:reconstruct(projection)};
+ });
  registerAppTool(server,'codeberg_migration_dashboard',{
   title:'Codeberg Transition Console',
   description:'Open an interactive migration console, showing repo counts and controls. Does not perform migration.',
