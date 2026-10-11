@@ -151,5 +151,29 @@
     "token isolation",
     "license audit",
     "Codeberg policy compliance"
+  ],
+  "supplemental_sources": [
+    {
+      "repo": "MarcusHoltz/git-propagate",
+      "sha": "9e3cd87d034d736eb377d11c54ed1614574619a4",
+      "license": "not reported in GitHub API",
+      "runtime": "Bash",
+      "role": "cross-provider configurable one-way Git ref propagation",
+      "does_not_do": [
+        "issue sync",
+        "pull-request review/identity sync"
+      ],
+      "priority": "low"
+    }
+  ],
+  "methodology": [
+    "inspect issue/request scope",
+    "verify source repository existence",
+    "pin commit SHA and license",
+    "read README and implementation/test code",
+    "record actual direction/scope and negative claims",
+    "cross-check official Forgejo API semantics",
+    "rank integration approach",
+    "persist provenance and release blockers"
   ]
 }
