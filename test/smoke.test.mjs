@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import net from 'node:net';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 
 const wait = ms => new Promise(resolve=>setTimeout(resolve,ms));
 async function unusedPort(){
@@ -33,8 +36,9 @@ async function probe(url,request){
 }
 test('real MCP HTTP server exposes tools and interactive ui resource',async()=>{
  const port=await unusedPort();
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'semantic-mcp-smoke-'));
  const server=spawn(process.execPath,['src/server.mjs'],{
-  env:{...process.env,MCP_PORT:String(port),MCP_BIND_HOST:'127.0.0.1'},
+  env:{...process.env,MCP_PORT:String(port),MCP_BIND_HOST:'127.0.0.1',MCP_STATE_DIR:dir},
   stdio:['ignore','pipe','pipe'],
  });
  let logs='';
@@ -60,16 +64,44 @@ test('real MCP HTTP server exposes tools and interactive ui resource',async()=>{
   assert.ok(names.includes('codeberg_migration_preview'),JSON.stringify(names));
   assert.ok(names.includes('codeberg_migrate_all_repositories'));
   assert.ok(names.includes('codeberg_migration_dashboard'));
+  assert.ok(names.includes('codeberg_semantic_preview'));
+  assert.ok(names.includes('codeberg_semantic_intervene'));
+  assert.ok(names.includes('codeberg_semantic_reproject'));
+  assert.ok(names.includes('codeberg_semantic_receipt'));
   const resources=await probe(target,{jsonrpc:'2.0',id:3,method:'resources/list'});
   assert.ok(resources.resources?.some(x=>x.uri==='ui://codeberg-transition/dashboard.html'));
   const content=await probe(target,{jsonrpc:'2.0',id:4,method:'resources/read',params:{
    uri:'ui://codeberg-transition/dashboard.html',
   }});
   assert.ok(content.contents?.[0]?.text?.includes('TRANSITION CONSOLE'));
+  const source={provider:'gerrit',repository:'sample/sample',changeId:'review-5',
+   sourceUrl:'https://review.example.org/c/sample/+/5',title:'Retain patch sets',
+   facts:[{sourceId:'vote-5',kind:'numeric_review_vote',value:{vote:2},
+    sourceLocator:'https://review.example.org/c/sample/+/5#vote'}]};
+  const preview=await probe(target,{jsonrpc:'2.0',id:5,method:'tools/call',params:{
+   name:'codeberg_semantic_preview',arguments:{source,target:'github'}
+  }});
+  assert.equal(preview.structuredContent?.lossReport.unsupported,1);
+  const saved=await probe(target,{jsonrpc:'2.0',id:6,method:'tools/call',params:{
+   name:'codeberg_semantic_intervene',arguments:{
+    source,target:'github',inferences:[{type:'review_intent',
+     claim:'Source Gerrit recorded +2 on this revision, but this is not a GitHub approval.',
+     basedOn:['vote-5'],confidence:1,route:'native_note'}],saveReceipt:true
+   }
+  }});
+  assert.match(saved.structuredContent?.receipt?.receiptId||'',/^[0-9a-f]{64}$/);
+  const reprojected=await probe(target,{jsonrpc:'2.0',id:7,method:'tools/call',params:{
+   name:'codeberg_semantic_reproject',arguments:{
+    receiptId:saved.structuredContent.receipt.receiptId,target:'gerrit'
+   }
+  }});
+  assert.equal(reprojected.structuredContent?.lossReport.unsupported,0);
+  assert.equal(reprojected.structuredContent?.inheritedInference,true);
   const bad=await fetch(target,{headers:{'x-forwarded-for':'198.51.100.12'}});
   assert.equal(bad.status,401,'Untrusted host should never reach MCP');
  }finally{
   server.kill('SIGTERM');
   await new Promise(resolve=>{if(server.exitCode!==null)resolve();else server.once('exit',resolve);});
+  await fs.rm(dir,{recursive:true,force:true});
  }
 });
