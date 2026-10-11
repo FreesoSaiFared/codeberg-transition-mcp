@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import {captureChange,assessProjection,intervene,reconstruct,TARGETS} from '../src/semantic.mjs';
+import {captureChange,assessProjection,intervene,reconstruct,reproject,TARGETS} from '../src/semantic.mjs';
 import {saveSemanticReceipt,loadSemanticReceipt} from '../src/semantic-journal.mjs';
 
 function gerritFixture(){
@@ -99,4 +99,24 @@ test('credential-shaped fields cannot be persisted as forge evidence',()=>{
   title:'Test',facts:[{kind:'review_thread',sourceId:'foo',sourceLocator:'https://github.com/x/y/pull/5',
     value:{authorization:'Bearer sensitive'}}]
  }),/Credential-like/);
+});
+
+test('future destination capability expands without losing earlier AI interpretation',()=>{
+ const original=assessProjection(gerritFixture(),'minimal');
+ const repaired=intervene(original,[{
+  type:'review_intent',
+  claim:'A reviewer endorsed Gerrit patchset 3; this is not a native GitHub approval.',
+  basedOn:['change-42:vote-8','change-42:patchset-3'],
+  confidence:0.97,route:'native_note'
+ }]);
+ const later=reproject(repaired,'gerrit');
+ assert.equal(later.gaps.length,0);
+ assert.equal(later.nativeEvents.length,4);
+ assert.equal(later.sidecar.inference.length,1);
+ assert.equal(later.inheritedInference,true);
+ assert.deepEqual(later.migrationHistory,{
+  from:'minimal',to:'gerrit',formerGaps:4,currentGaps:0
+ });
+ assert.equal(later.lossReport.nativeVerifiedByAI,0);
+ assert.deepEqual(reconstruct(later).envelope.source,gerritFixture().source);
 });
