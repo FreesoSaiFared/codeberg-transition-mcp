@@ -151,7 +151,7 @@ export function intervene(projection,interventions=[]){
     throw Error('Inferences cannot authorize review, merge, CI or identity actions');
   return {id:'ai-'+(index+1),type,claim,basedOn:[...new Set(i.basedOn)],
    confidence,route,status:'hypothesis',requiresHumanConfirmation:consequential,
-   source:'AI-assisted interpretation',nativeAction:suggestedNativeAction};
+   source:'AI-assisted interpretation',nativeAction:suggestedNativeAction||null};
  });
  const next=copy(projection);
  next.sidecar.inference=decisions;
