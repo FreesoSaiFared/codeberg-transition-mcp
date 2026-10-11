@@ -159,6 +159,48 @@ $('mirror-confirm').addEventListener('input',updateMirrorApproval);
 $('mirror-create-missing').addEventListener('change',()=>{
  mirrorState=null;$('mirror-plan-id').textContent='PREVIEW REQUIRED';updateMirrorApproval();
 });
+async function searchSources(){
+ const q=$('quarry-query').value.trim();
+ $('quarry-search').disabled=true;
+ $('quarry-message').textContent='Searching source provenance…';
+ try{
+  const data=await call('codeberg_source_quarry',{query:q,limit:30});
+  const body=$('quarry-results');body.replaceChildren();
+  for(const s of data.results||[]){
+   const tr=document.createElement('tr');
+   const td=document.createElement('td');
+   const link=document.createElement('a');
+   link.textContent=s.repo||s.id;
+   link.href=s.link;
+   link.target='_blank';
+   link.rel='noopener noreferrer';
+   td.appendChild(link);tr.appendChild(td);
+   cell(tr,(s.reuse||s.pattern||'').slice(0,180));
+   cell(tr,(s.license||'check license')+' / '+s.priority);
+   body.appendChild(tr);
+  }
+  if(!data.results?.length){
+   const tr=document.createElement('tr');cell(tr,'No verified sources match.');body.appendChild(tr);
+  }
+  $('quarry-message').textContent=data.matched+' matched. Read upstream limitations before adapting algorithms.';
+ }catch(error){$('quarry-message').textContent='Search failed: '+error.message;}
+ finally{$('quarry-search').disabled=false;}
+}
+async function checkSourceDrift(){
+ $('quarry-upstream').disabled=true;
+ $('quarry-message').textContent='Checking live upstream repository metadata…';
+ try{
+  const data=await call('codeberg_quarry_upstream_status',{limit:8});
+  const changed=data.results?.filter(s=>s.licenseChanged||s.archived||!s.exists)||[];
+  $('quarry-message').textContent='Checked '+(data.results?.length||0)+' upstream sources. '+
+    (changed.length?changed.map(s=>s.repo+': '+(s.caution||s.error)).join(' · '):
+      'No archived repositories or license drift detected in this subset. No source code installed.');
+ }catch(error){$('quarry-message').textContent='Upstream check failed: '+error.message;}
+ finally{$('quarry-upstream').disabled=false;}
+}
+$('quarry-search').addEventListener('click',searchSources);
+$('quarry-upstream').addEventListener('click',checkSourceDrift);
+$('quarry-query').addEventListener('keydown',e=>{if(e.key==='Enter')void searchSources();});
 $('preview').addEventListener('click',preview);
 $('refresh').addEventListener('click',refresh);
 $('execute').addEventListener('click',execute);
