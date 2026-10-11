@@ -94,6 +94,15 @@ footer{border-top:1px solid var(--rule);padding-top:12px;margin-top:28px;font:10
 <div class="actions"><button id="mirror-execute" class="warning" disabled>ENABLE CODEBERG PUSH MIRRORS</button></div>
 <div id="mirror-message" role="status" aria-live="polite">Nothing is mirrored until explicit authorization.</div>
 </section>
+<section class="panel" id="research-quarry">
+<div class="panelhead"><h2>05 / OPEN FORGE SOURCE QUARRY</h2><div class="eyebrow">EVIDENCE / NOT AUTOMATION</div></div>
+<p class="intro">Inspect existing open-source implementations before building adapters. Sources include Forgejo, GitHub, GitLab, SourceHut and portable Git-native issue trackers. Query results distinguish capabilities, limitations and licenses.</p>
+<label for="quarry-query"><span class="label">SEARCH CODE / ISSUES / PR / IDENTITY / FEDERATION</span></label>
+<input id="quarry-query" class="field" autocomplete="off" placeholder="e.g. three-way conflicts">
+<div class="actions"><button id="quarry-search">SEARCH VERIFIED SOURCES</button><button id="quarry-upstream" class="secondary">CHECK UPSTREAM DRIFT</button></div>
+<div id="quarry-message" role="status" aria-live="polite">This lookup is read-only. No third-party code is installed automatically.</div>
+<div class="tablewrap"><table><thead><tr><th scope="col">SOURCE</th><th scope="col">APPLICATION</th><th scope="col">LICENSE / PRIORITY</th></tr></thead><tbody id="quarry-results"><tr><td colspan="3">Search the source quarry to inspect implementation evidence.</td></tr></tbody></table></div>
+</section>
 <footer>CODEBERG TRANSITION MCP · REPOSITORY COPY ONLY · PUBLIC SOURCE <span id="connected">/ DISCONNECTED</span></footer>
 </main>
 <script>/*__MCP_APP_BUNDLE__*/</script>
