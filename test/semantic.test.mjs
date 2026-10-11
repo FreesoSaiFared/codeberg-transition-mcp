@@ -120,3 +120,26 @@ test('future destination capability expands without losing earlier AI interpreta
  assert.equal(later.lossReport.nativeVerifiedByAI,0);
  assert.deepEqual(reconstruct(later).envelope.source,gerritFixture().source);
 });
+
+test('GitLab diff discussion needs revision triangle even if GitHub has a line anchor',()=>{
+ const change=captureChange({provider:'github',repository:'acme/engine',
+  changeId:19,sourceUrl:'https://github.com/acme/engine/pull/19',
+  title:'Fix retry race',facts:[{
+   sourceId:'gh-comment-9',kind:'inline_comment',value:{body:'Check this range'},
+   sourceLocator:'https://github.com/acme/engine/pull/19#discussion-9',
+   fileAnchor:{commitId:'abc',path:'src/retry.ts',line:42}
+  }]
+ });
+ const github=assessProjection(change,'github');
+ assert.equal(github.lossReport.native,1);
+ const gitlab=assessProjection(change,'gitlab');
+ assert.equal(gitlab.lossReport.native,0);
+ assert.equal(gitlab.gaps.length,1);
+ assert.match(gitlab.gaps[0].reason,/missing_revision_anchor/);
+ assert.match(gitlab.gaps[0].reason,/baseSha/);
+ const hint=intervene(gitlab,[{type:'review_anchor',
+  claim:'The target diff position needs an exact base/head/start SHA triangle; seek these in source commits.',
+  basedOn:['gh-comment-9'],confidence:0.98,route:'sidecar'}]);
+ assert.equal(hint.sidecar.inference[0].status,'hypothesis');
+ assert.equal(reconstruct(hint).originalFacts,1);
+});
