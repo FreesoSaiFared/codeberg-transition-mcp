@@ -1,0 +1,96 @@
+{
+  "schema": "source-quarry/v1",
+  "quarriedAt": "2026-10-11",
+  "intent": "Inspect alternative review and identity semantics before implementing additional forge adapters",
+  "sources": [
+    {
+      "id": "radicle-protocol",
+      "url": "https://radicle.dev/guides/protocol",
+      "evidence": "official-doc-checked",
+      "priority": "P1",
+      "scope": [
+        "radicle",
+        "peer-to-peer",
+        "git-native-issues",
+        "patches",
+        "identity"
+      ],
+      "pattern": "Independent peer-owned Git namespaces and P2P discovery; issues and patches replicated alongside Git code.",
+      "limits": "Radicle patch proposals are not identical to GitHub PRs; adapter must preserve peer identity and revision state.",
+      "read": [
+        "https://radicle.dev/guides/protocol"
+      ]
+    },
+    {
+      "id": "gitlab-notes-api",
+      "url": "https://docs.gitlab.com/api/notes/",
+      "evidence": "official-doc-checked",
+      "priority": "P1",
+      "scope": [
+        "gitlab",
+        "notes",
+        "issues",
+        "merge-requests",
+        "events"
+      ],
+      "pattern": "Comments, system notes and distinct label/state/milestone resource events need separate event adapters.",
+      "limits": "A notes-only projection omits resource state event history; pagination and confidential note constraints apply.",
+      "read": [
+        "https://docs.gitlab.com/api/notes/"
+      ]
+    },
+    {
+      "id": "bitbucket-cloud-pullrequests",
+      "url": "https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/",
+      "evidence": "official-doc-checked",
+      "priority": "P2",
+      "scope": [
+        "bitbucket",
+        "cloud",
+        "pull-requests",
+        "review",
+        "inline-comments"
+      ],
+      "pattern": "Pull request activity includes approvals, requested changes and inline diff comments as distinct records.",
+      "limits": "Cloud and Data Center APIs are different; issue tracker availability and permissions must be rechecked.",
+      "read": [
+        "https://developer.atlassian.com/cloud/bitbucket/rest/api-group-pullrequests/"
+      ]
+    },
+    {
+      "id": "azure-devops-pr-workitems",
+      "url": "https://learn.microsoft.com/en-us/rest/api/azure/devops/git/pull-request-work-items/list?view=azure-devops-rest-7.1",
+      "evidence": "official-doc-checked",
+      "priority": "P2",
+      "scope": [
+        "azure-devops",
+        "pull-requests",
+        "work-items",
+        "identity"
+      ],
+      "pattern": "Model explicit PR to work-item links separately from repository refs and review comments.",
+      "limits": "Organization/project/repository scoping, permissions and Azure identity are not directly portable to Forgejo.",
+      "read": [
+        "https://learn.microsoft.com/en-us/rest/api/azure/devops/git/pull-requests/get-pull-requests?view=azure-devops-rest-7.1"
+      ]
+    },
+    {
+      "id": "gerrit-changes-api",
+      "url": "https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html",
+      "evidence": "official-doc-checked",
+      "priority": "P2",
+      "scope": [
+        "gerrit",
+        "patch-sets",
+        "code-review",
+        "votes",
+        "comments"
+      ],
+      "pattern": "Review objects have persistent Change-Id, patch-set revisions, label votes and diff-anchored review threads.",
+      "limits": "Do not flatten Gerrit multiple patch sets and review votes into a single GitHub PR body.",
+      "read": [
+        "https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html"
+      ]
+    }
+  ]
+}
