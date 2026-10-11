@@ -4,6 +4,7 @@ import path from 'node:path';
 import {z} from 'zod';
 import {registerAppTool,registerAppResource,RESOURCE_MIME_TYPE} from '@modelcontextprotocol/ext-apps/server';
 
+import {observeCapabilities} from './evolution.mjs';
 const UI='ui://codeberg-transition/dashboard.html';
 const respond=async(task)=>{
  try{
@@ -20,6 +21,7 @@ export function registerTools(server,api,planner){
  },args=>respond(()=>action(args)));
  const cap=tool('codeberg_diagnostics','Check Codeberg and GitHub migration readiness without exposing credentials.',z.object({}),
   ()=>api.capabilities());
+ tool('codeberg_live_capabilities','Inspect live Forgejo API and detect migration schema drift.',z.object({}),()=>observeCapabilities(api,api.c.stateDir));
  tool('codeberg_repositories','List repositories of the authenticated Codeberg/Forgejo user.',z.object({}),
   ()=>api.forgeRepos());
  tool('codeberg_read_file','Read a text file inside a Codeberg/Forgejo repository.',z.object({
