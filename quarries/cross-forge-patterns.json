@@ -1,0 +1,145 @@
+{
+  "schema": "source-quarry/v1",
+  "quarriedAt": "2026-10-11",
+  "principle": "Portable collaboration state should be provider-independent; provider-specific APIs and identities are projections.",
+  "sources": [
+    {
+      "id": "git-bug",
+      "repo": "git-bug/git-bug",
+      "license": "GPL-3.0",
+      "scope": [
+        "git-native-issues",
+        "github",
+        "gitlab",
+        "jira",
+        "launchpad"
+      ],
+      "evidence": "repo-doc-checked",
+      "pattern": "Issues in Git storage; modular bridge import/export; one identity layer per provider.",
+      "limits": "Provider bridge capabilities differ and should be checked before claiming two-way fidelity.",
+      "priority": "P1"
+    },
+    {
+      "id": "git-native-issue",
+      "repo": "remenoscodes/git-native-issue",
+      "license": "GPL-2.0",
+      "scope": [
+        "git-native-issues",
+        "github",
+        "gitlab",
+        "gitea",
+        "forgejo"
+      ],
+      "evidence": "repo-doc-checked",
+      "pattern": "Event-sourced refs/issues/* with immutable IDs and Provider-ID mapping; import/export across four forge families.",
+      "limits": "Cross-forge comment update/delete and multiple simultaneous writers need independent collision testing.",
+      "priority": "P1"
+    },
+    {
+      "id": "gh-issue-sync",
+      "repo": "mitsuhiko/gh-issue-sync",
+      "license": "Apache-2.0",
+      "scope": [
+        "github",
+        "markdown-local"
+      ],
+      "evidence": "repo-readme-checked",
+      "pattern": "Three-way local/original/remote comparison; skip on concurrent conflict.",
+      "limits": "Local GitHub workflow, not turnkey cross-forge synchronization.",
+      "priority": "P0"
+    },
+    {
+      "id": "forgefed",
+      "repo": "forgefed/forgefed",
+      "license": "CC0-1.0",
+      "scope": [
+        "federation",
+        "activitypub",
+        "forges"
+      ],
+      "evidence": "protocol-repo-checked",
+      "pattern": "Interoperable forge and identity protocol: prefer identity/federation over synchronized shadow copies long-term.",
+      "limits": "Forgejo federation experimental as of mid 2026, with explicitly warned domain compatibility risks.",
+      "priority": "P2"
+    },
+    {
+      "id": "gitlab-foss-two-way-proposal",
+      "url": "https://gitlab.com/gitlab-org/gitlab-foss/-/issues/47249",
+      "scope": [
+        "github",
+        "gitlab"
+      ],
+      "evidence": "issue-checked",
+      "pattern": "GitLab as authoritative forge with GitHub outward-facing mirror; incoming issues, wiki, PRs and releases.",
+      "limits": "Historical feature request; not evidence the complete feature exists.",
+      "priority": "P2"
+    },
+    {
+      "id": "gitlab-bi-directional-mirror",
+      "url": "https://gitlab.com/gitlab-org/gitlab/-/issues/3745",
+      "scope": [
+        "gitlab",
+        "github",
+        "git"
+      ],
+      "evidence": "issue-checked",
+      "pattern": "Document conflicts from simultaneous edits, force-push and rewritten history before permitting bidirectional Git.",
+      "limits": "Issue discussion, not turnkey synchronization.",
+      "priority": "P0"
+    },
+    {
+      "id": "sourcehut",
+      "url": "https://docs.sourcehut.org/hub.sr.ht/",
+      "scope": [
+        "sourcehut",
+        "graphql",
+        "email-patch"
+      ],
+      "evidence": "official-api-doc-checked",
+      "pattern": "Transport adapter for git.sr.ht/hg.sr.ht, todo.sr.ht, lists.sr.ht and patch-series review.",
+      "limits": "No one-to-one hosted PR object; use patch series as review object and preserve mail headers.",
+      "priority": "P2"
+    },
+    {
+      "id": "plane-forge-bridge",
+      "repo": "hstern/plane-forge-bridge",
+      "license": "MIT",
+      "scope": [
+        "forgejo",
+        "gitea",
+        "plane"
+      ],
+      "evidence": "repo-readme-checked",
+      "pattern": "Webhook HMAC + loop marker + LRU idempotence + identity fallback; potentially reusable adapter abstractions.",
+      "limits": "Not GitHub/Codeberg issue bridge directly; release lists unfinished reverse semantics.",
+      "priority": "P1"
+    },
+    {
+      "id": "codeberg-official-policy",
+      "url": "https://docs.codeberg.org/getting-started/faq/",
+      "scope": [
+        "codeberg",
+        "policy"
+      ],
+      "evidence": "official-doc-checked",
+      "pattern": "Check Codeberg storage and mirroring resource limits before mass migration; prefer controlled pushes, not passive pull mirrors.",
+      "limits": "Codeberg project and AI-content policies impose independent eligibility constraints.",
+      "priority": "P0"
+    },
+    {
+      "id": "raylabs-destinations",
+      "url": "https://gitea-mirror.raylabs.io/docs/destinations/",
+      "scope": [
+        "github",
+        "gitlab",
+        "gitea",
+        "forgejo",
+        "codeberg"
+      ],
+      "evidence": "official-doc-checked",
+      "pattern": "Cross-provider destination push engine with source-specific feature matrix and persistent bare clones.",
+      "limits": "GitHub/GitLab target paths beta; metadata capability varies with source.",
+      "priority": "P1"
+    }
+  ]
+}
