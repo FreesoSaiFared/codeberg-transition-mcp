@@ -1,0 +1,155 @@
+{
+  "schema": "source-quarry/v1",
+  "captured_at": "2026-10-11",
+  "target_project": "FreesoSaiFared/codeberg-transition-mcp",
+  "scope": "Codeberg authoritative; GitHub publishes code and accepts external contributions",
+  "upstream_issue": {
+    "url": "https://codeberg.org/forgejo/forgejo/issues/7556",
+    "state": "open",
+    "comments": 0,
+    "scope": [
+      "git refs",
+      "issues",
+      "PRs",
+      "contributors",
+      "credentials",
+      "CI"
+    ],
+    "kind": "feature-request-not-ready-solution"
+  },
+  "sources": [
+    {
+      "repo": "eleboucher/forgesync",
+      "sha": "f5a8d03ac82d4cb7962b92e0bb7b28cdabfd443c",
+      "license": "MIT",
+      "runtime": "Go 1.26.2",
+      "direction": "GitHub ↔ Forgejo issues/comments/labels; GitHub PR shadow and explicit promotion",
+      "paths": [
+        "internal/marker/marker.go",
+        "internal/syncloop/syncloop.go",
+        "internal/sink/forgejo/sink.go",
+        "internal/sink/github/sink.go",
+        "internal/gitops/gitops.go"
+      ],
+      "integration": "version-pinned sidecar or attributed MIT code port",
+      "priority": 1,
+      "risks": [
+        "removed markers or eventual-index search",
+        "same-repo GitHub PR head deletion under git push --mirror",
+        "review/identity fidelity incomplete"
+      ]
+    },
+    {
+      "repo": "lukaswrz/forgesync",
+      "sha": "4e9dd03ad4f0927cbc89fc3ea389551751a7460f",
+      "license": "AGPL-3.0",
+      "runtime": "Python==3.13",
+      "direction": "Codeberg → GitHub repo descriptions/topics/settings and mirror provisioning",
+      "paths": [
+        "src/forgesync/description.py",
+        "src/forgesync/mirror.py",
+        "src/forgesync/github.py",
+        "src/forgesync/forgejo.py"
+      ],
+      "integration": "architecture/reference or isolated AGPL-licensed sidecar",
+      "priority": 2,
+      "risks": [
+        "mirror recreate/purge can delete mirror configuration",
+        "no issue-content bridge",
+        "not user/PR identity proxy"
+      ]
+    },
+    {
+      "repo": "RayLabsHQ/gitea-mirror",
+      "sha": "ba50792b0c954ce8e1d463f048a66b908815d724",
+      "license": "AGPL-3.0",
+      "runtime": "TypeScript Astro Bun >=1.2.9",
+      "direction": "GitHub → Forgejo mature; Forgejo → GitHub code-only beta",
+      "paths": [
+        "docs/PUSH_TARGETS.md",
+        "docs/FORCE_PUSH_PROTECTION.md",
+        "src/lib/destination-reconcile.ts"
+      ],
+      "integration": "study tested sync/recovery patterns; keep standalone",
+      "priority": 3,
+      "risks": [
+        "target force/push prune destructive",
+        "selected force-push protection fail-open",
+        "Forgejo source → GitHub destination lacks issues/PRs/releases/LFS"
+      ]
+    },
+    {
+      "repo": "PatNei/GITHUB2FORGEJO",
+      "sha": "ac84e6e1a9e0d55a041a1d8e9ba7092eadd85433",
+      "license": "GPL-3.0",
+      "runtime": "Bash curl jq bats",
+      "direction": "GitHub → Forgejo import/mirror; configurable push direction",
+      "paths": [
+        "github-forgejo-migrate.sh",
+        "test/validation.bats"
+      ],
+      "integration": "borrow test cases/migration semantics not code",
+      "priority": 4,
+      "risks": [
+        "not continuous social sync",
+        "GPL source-copy obligations",
+        "destructive cleanup option"
+      ]
+    },
+    {
+      "repo": "trapexit/sync-github-to-forgejo",
+      "sha": "e6e953f91d031ec6cc6c8998a78cb4a3a2b664b1",
+      "license": "missing",
+      "runtime": "Python 3.10+ stdlib",
+      "direction": "GitHub → Forgejo mirror creator",
+      "paths": [
+        "sync-github-to-forgejo"
+      ],
+      "integration": "behavior reference; no code copying without permission",
+      "priority": 5,
+      "risks": [
+        "unlicensed",
+        "no PR/issue sync"
+      ]
+    },
+    {
+      "repo": "kindofabuzz/forgejo-to-github",
+      "sha": "98fe79366c0c3fc7e5b1f4c0199a7100f604cd90",
+      "license": "incomplete MIT-looking LICENSE; GitHub NOASSERTION",
+      "runtime": "Bash",
+      "direction": "repository scaffolding and Forgejo → GitHub mirror setup",
+      "paths": [
+        "git-create",
+        "README.md",
+        "LICENSE"
+      ],
+      "integration": "guide example only",
+      "priority": 6,
+      "risks": [
+        "no PR translation",
+        "hardcoded host URL",
+        "incomplete license text"
+      ]
+    }
+  ],
+  "rules": {
+    "source_of_truth": "Codeberg",
+    "git_direction": "Codeberg -> GitHub",
+    "social_direction": "GitHub -> Codeberg, then optional carefully guarded two-way",
+    "releases": "separate metadata and asset adapters",
+    "pr_bridge": "shadow issues; explicit opt-in fork PR promotion",
+    "identity": "attribution not impersonation",
+    "licenses": "retain notice for MIT; isolate GPL/AGPL; no copying unknown licenses",
+    "ref_safety": "complete branch/tag preflight, fail-closed; default-branch SHA equality insufficient",
+    "idempotency": "cross-provider provenance marker and optional durable receipts"
+  },
+  "release_blockers": [
+    "all-ref safety tests",
+    "conflict and idempotency tests",
+    "fork PR lifecycle tests",
+    "identity attribution",
+    "token isolation",
+    "license audit",
+    "Codeberg policy compliance"
+  ]
+}
