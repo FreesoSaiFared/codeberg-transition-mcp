@@ -25,6 +25,7 @@ Create `~/.config/codeberg-transition-mcp/env` for the provided Linux systemd un
 | `CODEBERG_TOKEN` | Personal token created in Codeberg Settings → Applications |
 | `GITHUB_TOKEN` | GitHub token for inventory and verification; stays on this MCP host |
 | `GITHUB_MIGRATE_TOKEN` | **Separate**, minimally scoped GitHub read token needed for metadata/private imports; is transmitted to destination Forgejo |
+| `GITHUB_MIRROR_TOKEN` | Separate GitHub repository Contents write token used by Codeberg to push commits. Do not reuse a broad inventory token. |
 | `MCP_GATEWAY_TOKEN` | Required when listening off loopback; does not replace HTTPS and proper ChatGPT OAuth |
 
 With **no** `GITHUB_MIGRATE_TOKEN`, choose Git-only mode if you want public history without issue/release metadata. Creating a separate migration token and revoking it afterwards is recommended. Avoid using your full-permission GitHub token as the migration token.
@@ -37,7 +38,17 @@ In **ChatGPT → Plugins → + → Add custom MCP server**, select **Tunnel**, s
 
 Public distribution instead requires a stable HTTPS endpoint plus standards-compliant OAuth 2.1, and is **not implemented** in this pre-release. Never publish an unauthenticated instance offering migration write operations.
 
-## 4. Preview, approve, and verify
+## 4. Codeberg-first GitHub publication mirrors
+
+Use `codeberg_push_mirror_preview` to inspect all owned Codeberg repositories and existing GitHub targets. The preview refuses diverged default-branch histories and shows absent destinations. With `createMissing=true`, the approved execution can create empty missing GitHub repositories before configuring mirrors. Review visibility carefully, particularly when publishing private projects.
+
+Set `GITHUB_MIRROR_TOKEN` on i9ES with write access to the intended GitHub repositories; the dedicated token will be transmitted to **Codeberg** as the mirroring service, never embedded in a remote URL. Use `codeberg_push_mirror_enable` with the exact confirmation phrase and approval. This creates a Codeberg push mirror, enables `sync_on_commit`, optionally requests an initial sync and verifies GitHub's default-branch SHA. Treat pending status as asynchronous, not success.
+
+GitHub issues, pull requests, wiki and release metadata are **not** continuously synchronized by Git push mirroring. Codeberg remains source of truth.
+
+See [guide quarrying](STEP-BY-STEP-GUIDE-QUARRYING.md) for the source guide, UI fallback in ABP and verified Forgejo API correspondence.
+
+## 5. Preview, approve, and verify
 
 Ask ChatGPT to use the existing GitHub connector for the account inventory, pass it to `codeberg_migration_preview`, review collisions, and then display `codeberg_migration_dashboard`. Actual execution requires exact confirmation text and an explicit Codeberg policy acknowledgment.
 
