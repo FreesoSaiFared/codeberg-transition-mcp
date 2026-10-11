@@ -22,7 +22,7 @@ async function probe(url,request){
  assert.equal(response.status,200,text.slice(0,800));
  const mime=response.headers.get('content-type')||'';
  const payload=mime.includes('event-stream')
-   ? text.split(/\\r?\\n/).find(x=>x.startsWith('data:'))?.slice(5).trim()
+   ? text.split(/\r?\n/).find(x=>x.startsWith('data:'))?.slice(5).trim()
    : text;
  assert.ok(payload,'No JSON-RPC result received: '+text.slice(0,300));
  const message=JSON.parse(payload);
