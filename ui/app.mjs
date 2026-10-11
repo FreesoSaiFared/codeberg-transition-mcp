@@ -98,6 +98,67 @@ async function execute(){
  }catch(err){message('Migration blocked: '+err.message);}
  finally{setBusy(false);}
 }
+let mirrorState=null;
+function mirrorMessage(value){$('mirror-message').textContent=value;}
+function updateMirrorApproval(){
+ $('mirror-execute').disabled=busy||!mirrorState||!mirrorState.counts?.ready||
+  !$('mirror-consent').checked||$('mirror-confirm').value.trim()!==mirrorState.confirmationPhrase;
+ $('mirror-confirm').placeholder=mirrorState?.confirmationPhrase||'MIRROR N REPOSITORIES';
+}
+function renderMirror(data){
+ if(data.type!=='codeberg_push_mirror')return;
+ mirrorState=data;
+ $('mirror-plan-id').textContent=data.id;
+ const body=$('mirror-repos');body.replaceChildren();
+ for(const entry of data.entries){
+  const tr=document.createElement('tr');
+  cell(tr,entry.source);
+  cell(tr,entry.target);
+  const reason=entry.blockedReasons?.length?' / '+entry.blockedReasons.join(', '):'';
+  cell(tr,entry.status+reason+(entry.last_error?' / '+entry.last_error:''),'state '+entry.status);
+  body.appendChild(tr);
+ }
+ if(!data.entries.length){const tr=document.createElement('tr');cell(tr,'No owned Codeberg repositories found.');body.appendChild(tr);}
+ const counts=Object.entries(data.counts).map(([key,val])=>key+': '+val).join(' · ');
+ mirrorMessage(counts+' · GitHub receives Git refs, not issues or PR metadata.');
+ updateMirrorApproval();
+}
+async function mirrorPreview(){
+ setBusy(true);mirrorMessage('Inspecting Codeberg repositories, GitHub destinations and commit heads…');
+ try{renderMirror(await call('codeberg_push_mirror_preview',{
+  createMissing:$('mirror-create-missing').checked
+ }));}catch(err){mirrorMessage('Preview failed: '+err.message);}
+ finally{setBusy(false);updateMirrorApproval();}
+}
+async function mirrorRefresh(){
+ if(!mirrorState?.id){await mirrorPreview();return;}
+ setBusy(true);mirrorMessage('Verifying mirrors and branch commit hashes…');
+ try{renderMirror(await call('codeberg_push_mirror_status',{id:mirrorState.id,refresh:true}));}
+ catch(err){mirrorMessage('Refresh failed: '+err.message);}
+ finally{setBusy(false);updateMirrorApproval();}
+}
+async function mirrorExecute(){
+ if(busy||!mirrorState?.counts?.ready||!$('mirror-consent').checked||
+    $('mirror-confirm').value.trim()!==mirrorState.confirmationPhrase)return;
+ setBusy(true);mirrorMessage('Configuring Codeberg → GitHub push mirrors with on-commit sync…');
+ try{
+  renderMirror(await call('codeberg_push_mirror_enable',{
+   plan_id:mirrorState.id,
+   confirmation:$('mirror-confirm').value.trim(),
+   acknowledgeMirrorWrites:true,syncNow:true
+  }));
+  mirrorMessage('Mirror setup submitted. Inspect VERIFIED vs PENDING; refresh after GitHub accepts the pushes.');
+ }catch(err){mirrorMessage('Mirror setup failed: '+err.message);}
+ finally{setBusy(false);updateMirrorApproval();}
+}
+$('mirror-preview').addEventListener('click',mirrorPreview);
+$('mirror-refresh').addEventListener('click',mirrorRefresh);
+$('mirror-execute').addEventListener('click',mirrorExecute);
+$('mirror-consent').addEventListener('change',updateMirrorApproval);
+$('mirror-confirm').addEventListener('input',updateMirrorApproval);
+$('mirror-create-missing').addEventListener('change',()=>{
+ mirrorState=null;$('mirror-plan-id').textContent='PREVIEW REQUIRED';updateMirrorApproval();
+});
 $('preview').addEventListener('click',preview);
 $('refresh').addEventListener('click',refresh);
 $('execute').addEventListener('click',execute);
@@ -107,7 +168,7 @@ $('git-only').addEventListener('change',()=>{
  if(snapshot){snapshot=null;$('plan-id').textContent='PREVIEW REQUIRED AFTER CHANGING MODE';updateConfirmation();}
 });
 app.ontoolresult=params=>{
- try{render(parse(params));}catch{}
+ try{const data=parse(params);if(data.type==='codeberg_push_mirror')renderMirror(data);else render(data);}catch{}
 };
 app.ontoolinput=params=>{
  const id=params.arguments?.id;
