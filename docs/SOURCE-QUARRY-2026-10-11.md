@@ -53,3 +53,10 @@ Do **not** build a new all-purpose bi-directional synchronizer. Use Codeberg's n
 4. Extend the MCP dashboard to distinguish `Git refs`, `Repository metadata`, `Issues & comments`, and `PR promotion`, with separate readiness and verification receipts.
 
 **Quarry status:** Source repository APIs, README files, targeted implementation files, license files and upstream Forgejo issue were directly inspected. Code from these upstream projects has **not** been copied or run in this MCP. This is evidence gathering and architecture selection, not a claim of successful two-way synchronization.
+
+
+## Supplemental source discovered via GitHub repository search
+
+[MarcusHoltz/git-propagate](https://github.com/MarcusHoltz/git-propagate/tree/9e3cd87d034d736eb377d11c54ed1614574619a4) (`9e3cd87`): a Bash CLI with configurable source/destination among Codeberg, GitHub, GitLab and self-hosted forges, a dry-run mode, and explicit token setup. It is a **Git-ref propagation engine** (branches/tags/history), not a contributor/issue/PR metadata bridge. No SPDX license was returned by the GitHub repository API at quarry time; license status requires review before code reuse. It adds limited value beyond the native Codeberg push mirror but helps validate cross-host configuration UX.
+
+GitHub repository searches combining `forgejo`, `github`, `issue`, `pull request`, `sync` did not uncover another directly relevant, demonstrably complete, out-of-box PR-review identity translator. This is a bounded search observation, not proof none exists anywhere.
