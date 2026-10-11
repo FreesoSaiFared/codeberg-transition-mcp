@@ -2,6 +2,12 @@
 
 An open-source ChatGPT MCP App for planning, executing, and verifying migrations from GitHub to [Codeberg](https://codeberg.org) or another Forgejo instance.
 
+## Development model
+
+**Codeberg is primary; GitHub is a continuously updated publication mirror.** After a one-time GitHub → Codeberg import, enable a Codeberg → GitHub **push mirror** with `sync_on_commit=true`. The MCP offers `codeberg_push_mirror_preview`, `codeberg_push_mirror_enable`, `codeberg_push_mirror_status`, and `codeberg_push_mirror_sync`. This updates Git refs only (not issues or PRs) and requires a separate `GITHUB_MIRROR_TOKEN` held privately on the MCP host.
+
+This implementation was **quarried directly** from [Kaksi Koivua’s step-by-step mirroring guide](https://kaksikoivua.hashnode.dev/setting-up-a-push-mirror-from-codeberg-to-github). See [Step-by-step-guide-quarrying](docs/STEP-BY-STEP-GUIDE-QUARRYING.md) and the [machine-readable 12-step recipe](guides/codeberg-to-github-push-mirror.json) for browser/ABP execution and verification.
+
 ## Goals
 
 - Retain Git history and optionally migrate issues, pull requests, labels, releases, milestones, wiki and LFS.
