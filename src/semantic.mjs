@@ -175,3 +175,22 @@ export function reconstruct(projection){
   inferences:sidecar.inference||[],
   caveat:'Reconstruction recovers recorded evidence, not native platform actions or new external events.'};
 }
+
+export function reproject(projection,nextTarget){
+ const {envelope,inferences}=reconstruct(projection);
+ const next=assessProjection(envelope,nextTarget);
+ // Retain prior AI interpretations as non-authoritative observations;
+ // never translate an AI hypothesis directly into a native approval/status.
+ if(inferences.length) {
+  const adapted=inferences.map(({type,claim,basedOn,confidence,route})=>({
+   type,claim,basedOn,confidence,route
+  }));
+  return {...intervene(next,adapted),
+   inheritedInference:true,
+   migrationHistory:{from:projection.target,to:nextTarget,
+    formerGaps:projection.gaps.length,currentGaps:next.gaps.length}};
+ }
+ return {...next,inheritedInference:false,
+  migrationHistory:{from:projection.target,to:nextTarget,
+   formerGaps:projection.gaps.length,currentGaps:next.gaps.length}};
+}
