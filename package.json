@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node src/server.mjs",
     "test": "node --test test/*.test.mjs",
-    "check": "for file in src/*.mjs; do node --check "$file" || exit 1; done",
+    "check": "for file in src/*.mjs; do node --check \"$file\" || exit 1; done",
     "doctor": "node src/doctor.mjs",
     "ui:build": "esbuild ui/app.mjs --bundle --format=iife --target=es2022 --outfile=ui/app.bundle.js"
   },
