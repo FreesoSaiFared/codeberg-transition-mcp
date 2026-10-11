@@ -5,7 +5,8 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const manifests=[
  'quarries/forge-bridges.json',
- 'quarries/cross-forge-patterns.json'
+ 'quarries/cross-forge-patterns.json',
+ 'quarries/other-forge-protocols.json'
 ];
 export async function loadQuarries(){
  const files=await Promise.all(manifests.map(async filename=>{
