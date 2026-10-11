@@ -22,6 +22,14 @@ The [2026-10-11 source quarry](docs/SOURCE-QUARRY-2026-10-11.md) inspects six su
 - Produce per-repository verification receipts, errors and resumable progress.
 - Respect Codeberg's [2026 policy on LLM-heavy repositories](https://blog.codeberg.org/protecting-our-floss-commons-from-llms.html). This software can target other Forgejo hosts if Codeberg is unsuitable.
 
+## Source quarry: interoperability beyond mirroring
+
+Use the read-only MCP tools `codeberg_source_quarry` and `codeberg_quarry_upstream_status` to inspect verified open-source implementations before writing adapters. The registry covers **GitHub, Codeberg, Forgejo, Gitea, GitLab, Bitbucket, Azure DevOps, Gerrit, SourceHut and Radicle**, distinguishing Git synchronization from issue/comment/review portability.
+
+See [the comparative source quarry](docs/FORGE-SOURCE-QUARRY.md) and its [forge bridge](quarries/forge-bridges.json), [cross-forge](quarries/cross-forge-patterns.json) and [other protocol](quarries/other-forge-protocols.json) manifests. The MCP Apps dashboard provides a searchable Source Quarry panel and upstream license-drift check.
+
+This is intentionally **not** a claim of finished two-way metadata synchronization. Incoming GitHub issue/comment reconciliation and PR promotion require more implementation, fixtures and integration tests.
+
 ## Status
 
 Initial implementation under construction. Do **not** use this repository to migrate production projects until the integration tests and installation checks are passing. The GitHub host was intentionally used for development and distribution.
