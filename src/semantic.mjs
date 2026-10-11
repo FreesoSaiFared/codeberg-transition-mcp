@@ -84,6 +84,20 @@ export function captureChange({provider,repository,changeId,sourceUrl,title,desc
  const source={provider,repository,changeId,sourceUrl,title,description,facts:normalized};
  return {schema:SEMANTIC_SCHEMA,source,sourceDigest:digest(source)};
 }
+function nativeConstraint(fact,target){
+ if(fact.kind!=='inline_comment')return null;
+ const anchor=fact.fileAnchor;
+ if(!anchor)return 'missing_file_anchor';
+ const required={
+  github:['commitId','path','line'],
+  forgejo:['commitId','path','line'],
+  gitlab:['baseSha','headSha','startSha','oldPath','newPath'],
+  gerrit:['path','line']
+ }[target]||[];
+ const missing=required.filter(name=>anchor[name]===undefined||anchor[name]===null);
+ if(target==='gerrit' && !fact.revision?.patchSet)missing.push('revision.patchSet');
+ return missing.length?'missing_revision_anchor:'+missing.join(','):null;
+}
 export function assessProjection(envelope,target){
  if(envelope?.schema!==SEMANTIC_SCHEMA||envelope.sourceDigest!==digest(envelope.source))
   throw Error('Source evidence integrity mismatch');
@@ -96,13 +110,16 @@ export function assessProjection(envelope,target){
  };
  const supported=[];const gaps=[];
  for(const fact of envelope.source.facts){
-  if(capabilities.includes(fact.kind)){
+  const constraint=nativeConstraint(fact,target);
+  if(capabilities.includes(fact.kind)&&!constraint){
    supported.push({sourceId:fact.sourceId,kind:fact.kind,route:'native',value:fact.value,
-    actor:fact.actor,revision:fact.revision||null,fileAnchor:fact.fileAnchor||null});
+    actor:fact.actor,revision:fact.revision||null,fileAnchor:fact.fileAnchor||null,
+    verifiedOnDestination:false,requiresApiReadback:true});
   }else gaps.push({
    sourceId:fact.sourceId,kind:fact.kind,original:fact.value,
    proposedRoute:routeFor(fact.kind),sourceLocator:fact.sourceLocator,
-   consequential:CONSEQUENCES.has(fact.kind),reason:'target_has_no_native_equivalent'
+   consequential:CONSEQUENCES.has(fact.kind),
+   reason:constraint||'target_has_no_native_equivalent'
   });
  }
  const metadata={
