@@ -5,6 +5,7 @@ import {z} from 'zod';
 import {registerAppTool,registerAppResource,RESOURCE_MIME_TYPE} from '@modelcontextprotocol/ext-apps/server';
 
 import {observeCapabilities} from './evolution.mjs';
+import {MirrorManager} from './mirror.mjs';
 const UI='ui://codeberg-transition/dashboard.html';
 const respond=async(task)=>{
  try{
@@ -15,6 +16,7 @@ const respond=async(task)=>{
  }
 };
 export function registerTools(server,api,planner){
+ const mirrors=new MirrorManager(api,api.c.stateDir);
  const tool=(name,description,schema,action,write=false)=>server.registerTool(name,{
   description,inputSchema:schema,
   annotations:{readOnlyHint:!write,destructiveHint:false,openWorldHint:true}
@@ -67,6 +69,24 @@ export function registerTools(server,api,planner){
   acknowledgePolicy:z.boolean(),
   allowGitOnly:z.boolean().default(false)
  }),({plan_id,...rest})=>planner.execute({id:plan_id,...rest}),true);
+ tool('codeberg_push_mirror_guide','Return step-by-step-guide-quarrying recipe for ABP browser execution and API verification.',z.object({}),async()=>{
+  const here=path.dirname(fileURLToPath(import.meta.url));
+  return JSON.parse(await fs.readFile(path.join(here,'../guides/codeberg-to-github-push-mirror.json'),'utf8'));
+ });
+ tool('codeberg_push_mirror_preview','Preview Codeberg to GitHub publication mirrors without writing to either provider. Checks Git SHA, missing targets, token scope and collisions.',z.object({
+  only:z.array(z.string()).max(3000).optional(),
+  createMissing:z.boolean().default(false)
+ }),a=>mirrors.preview(a));
+ tool('codeberg_push_mirror_status','Inspect push mirror configuration and verify Codeberg and GitHub default branch SHA synchronization.',z.object({
+  id:z.string().uuid(),refresh:z.boolean().default(true)
+ }),({id,refresh})=>mirrors.status(id,{refresh}));
+ tool('codeberg_push_mirror_enable','Enable all READY Codeberg-first GitHub publication mirrors from a reviewed plan. Requires explicit exact phrase and acknowledgement of GitHub writes.',z.object({
+  plan_id:z.string().uuid(),confirmation:z.string(),
+  acknowledgeMirrorWrites:z.boolean(),syncNow:z.boolean().default(true)
+ }),({plan_id,...rest})=>mirrors.execute({id:plan_id,...rest}),true);
+ tool('codeberg_push_mirror_sync','Trigger Codeberg push mirror sync for an existing repository. This sends Codeberg Git refs to GitHub.',z.object({
+  owner:z.string(),repo:z.string()
+ }),({owner,repo})=>mirrors.sync(owner,repo),true);
  registerAppTool(server,'codeberg_migration_dashboard',{
   title:'Codeberg Transition Console',
   description:'Open an interactive migration console, showing repo counts and controls. Does not perform migration.',
