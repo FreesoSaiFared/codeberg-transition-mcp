@@ -101,20 +101,6 @@
       "priority": "P2"
     },
     {
-      "id": "plane-forge-bridge",
-      "repo": "hstern/plane-forge-bridge",
-      "license": "MIT",
-      "scope": [
-        "forgejo",
-        "gitea",
-        "plane"
-      ],
-      "evidence": "repo-readme-checked",
-      "pattern": "Webhook HMAC + loop marker + LRU idempotence + identity fallback; potentially reusable adapter abstractions.",
-      "limits": "Not GitHub/Codeberg issue bridge directly; release lists unfinished reverse semantics.",
-      "priority": "P1"
-    },
-    {
       "id": "codeberg-official-policy",
       "url": "https://docs.codeberg.org/getting-started/faq/",
       "scope": [
