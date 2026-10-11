@@ -80,6 +80,20 @@ footer{border-top:1px solid var(--rule);padding-top:12px;margin-top:28px;font:10
 <input id="confirm" class="field" autocomplete="off" spellcheck="false" placeholder="MIGRATE N REPOSITORIES">
 <div class="actions"><button id="execute" class="warning" disabled>EXECUTE CONFIRMED PLAN</button></div>
 </section>
+<section class="panel" id="mirroring">
+<div class="panelhead"><h2>04 / CODEBERG → GITHUB / CONTINUOUS PUBLISHING</h2><div class="eyebrow">CODEBERG IS PRIMARY</div></div>
+<p class="intro">Configure push mirrors with <strong>sync on commit</strong>. GitHub receives Git branches and tags, not Codeberg issues or pull requests. Existing divergent GitHub branches are blocked.</p>
+<div class="actions"><button id="mirror-preview">PREVIEW PUSH MIRRORS</button><button id="mirror-refresh" class="secondary">VERIFY MIRROR STATUS</button></div>
+<label class="check"><input type="checkbox" id="mirror-create-missing"><span>Create missing GitHub repositories (empty) before configuring mirrors, only after confirmation.</span></label>
+<div class="label">PUSH MIRROR PLAN</div><div class="mono" id="mirror-plan-id">NO MIRROR PLAN</div>
+<div class="tablewrap"><table><thead><tr><th scope="col">CODEBERG SOURCE</th><th scope="col">GITHUB TARGET</th><th scope="col">STATE</th></tr></thead><tbody id="mirror-repos"><tr><td colspan="3">Generate a mirror preview to inspect candidate repositories.</td></tr></tbody></table></div>
+<div class="notice"><strong>OUTBOUND GIT PUBLISHING</strong>Requires a dedicated GitHub write token, held privately by the MCP host and registered in Codeberg. Review the <a href="https://kaksikoivua.hashnode.dev/setting-up-a-push-mirror-from-codeberg-to-github" target="_blank" rel="noopener noreferrer">original 12-step guide ↗</a>.</div>
+<label class="check"><input type="checkbox" id="mirror-consent"><span>I approve the listed Codeberg → GitHub Git ref updates and any explicitly previewed new GitHub repositories.</span></label>
+<label for="mirror-confirm"><span class="label">TYPE THE EXACT MIRROR CONFIRMATION PHRASE</span></label>
+<input id="mirror-confirm" class="field" autocomplete="off" spellcheck="false" placeholder="MIRROR N REPOSITORIES">
+<div class="actions"><button id="mirror-execute" class="warning" disabled>ENABLE CODEBERG PUSH MIRRORS</button></div>
+<div id="mirror-message" role="status" aria-live="polite">Nothing is mirrored until explicit authorization.</div>
+</section>
 <footer>CODEBERG TRANSITION MCP · REPOSITORY COPY ONLY · PUBLIC SOURCE <span id="connected">/ DISCONNECTED</span></footer>
 </main>
 <script>/*__MCP_APP_BUNDLE__*/</script>
