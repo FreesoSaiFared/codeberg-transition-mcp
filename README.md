@@ -8,6 +8,10 @@ An open-source ChatGPT MCP App for planning, executing, and verifying migrations
 
 This implementation was **quarried directly** from [Kaksi Koivua’s step-by-step mirroring guide](https://kaksikoivua.hashnode.dev/setting-up-a-push-mirror-from-codeberg-to-github). See [Step-by-step-guide-quarrying](docs/STEP-BY-STEP-GUIDE-QUARRYING.md) and the [machine-readable 12-step recipe](guides/codeberg-to-github-push-mirror.json) for browser/ABP execution and verification.
 
+## Source quarry: GitHub ↔ Codeberg beyond Git refs
+
+The [2026-10-11 source quarry](docs/SOURCE-QUARRY-2026-10-11.md) inspects six supplied synchronization projects and one additional discovered project, pins their source commits/licenses, and identifies reusable issue/comment sync, repository-metadata reconciliation, PR-promotion mechanisms and destructive push-mirror risks. The [machine-readable quarry ledger](quarries/bidirectional-sync-2026-10-11.json) records the audit and explicit release blockers. **Full bidirectional synchronization is not implemented yet.**
+
 ## Goals
 
 - Retain Git history and optionally migrate issues, pull requests, labels, releases, milestones, wiki and LFS.
