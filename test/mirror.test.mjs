@@ -21,7 +21,7 @@ async function fixture(mirrorToken='mirror-write-secret',diverged=false){
     writes.push({type:'add',body:opts.body});mirrored=true;return {remote_name:'github'};
    }
    if(route.endsWith('/push_mirrors-sync')){writes.push({type:'sync'});synced=true;return {};}
-   if(route.endsWith('/push_mirrors'))return mirrored?[{remote_address:'https://github.com/ghuser/alpha.git',sync_on_commit:true}]:[];
+   if(route.includes('/push_mirrors?'))return mirrored?[{remote_address:'https://github.com/ghuser/alpha.git',sync_on_commit:true}]:[];
    throw Error(route);
   },
   async getForgeBranch(){return {commit:{id:'same-sha'}};},
