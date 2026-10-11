@@ -6,6 +6,7 @@ import {registerAppTool,registerAppResource,RESOURCE_MIME_TYPE} from '@modelcont
 
 import {observeCapabilities} from './evolution.mjs';
 import {MirrorManager} from './mirror.mjs';
+import {quarrySearch,quarryUpstream} from './quarry.mjs';
 const UI='ui://codeberg-transition/dashboard.html';
 const respond=async(task)=>{
  try{
@@ -24,6 +25,15 @@ export function registerTools(server,api,planner){
  const cap=tool('codeberg_diagnostics','Check Codeberg and GitHub migration readiness without exposing credentials.',z.object({}),
   ()=>api.capabilities());
  tool('codeberg_live_capabilities','Inspect live Forgejo API and detect migration schema drift.',z.object({}),()=>observeCapabilities(api,api.c.stateDir));
+ tool('codeberg_source_quarry','Search inspected open-source patterns across GitHub, Codeberg, Forgejo, Gitea, GitLab, SourceHut and federation. Read-only provenance with limitations.',z.object({
+  query:z.string().max(160).optional(),
+  priority:z.enum(['P0','P1','P2','P3']).optional(),
+  limit:z.number().int().min(1).max(50).optional()
+ }),a=>quarrySearch(a));
+ tool('codeberg_quarry_upstream_status','Read current GitHub repository metadata to detect archived sources and license changes without installing code.',z.object({
+  ids:z.array(z.string()).max(12).optional(),
+  limit:z.number().int().min(1).max(12).optional()
+ }),a=>quarryUpstream(api,a));
  tool('codeberg_repositories','List repositories of the authenticated Codeberg/Forgejo user.',z.object({}),
   ()=>api.forgeRepos());
  tool('codeberg_read_file','Read a text file inside a Codeberg/Forgejo repository.',z.object({
