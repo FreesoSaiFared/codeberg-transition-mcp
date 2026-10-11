@@ -15,7 +15,7 @@ export async function loadQuarries(){
  }));
  const seen=new Set();
  return files.flatMap(manifest=>manifest.sources.map(source=>{
-  if(!source.id||seen.has(source.id)&&source.id!=='plane-forge-bridge')throw Error('Duplicate source '+source.id);
+  if(!source.id||seen.has(source.id))throw Error('Duplicate source '+source.id);
   seen.add(source.id);
   return {...source,manifest:manifest.file,
    link:source.url||'https://github.com/'+source.repo};
