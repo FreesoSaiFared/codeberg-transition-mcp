@@ -20,8 +20,12 @@ async function probe(url,request){
  });
  const text=await response.text();
  assert.equal(response.status,200,text.slice(0,800));
- assert.match(response.headers.get('content-type')||'',/json/);
- const message=JSON.parse(text);
+ const mime=response.headers.get('content-type')||'';
+ const payload=mime.includes('event-stream')
+   ? text.split(/\\r?\\n/).find(x=>x.startsWith('data:'))?.slice(5).trim()
+   : text;
+ assert.ok(payload,'No JSON-RPC result received: '+text.slice(0,300));
+ const message=JSON.parse(payload);
  assert.equal(message.jsonrpc,'2.0');
  assert.equal(message.id,request.id);
  assert.ok(!message.error,message.error?.message);
