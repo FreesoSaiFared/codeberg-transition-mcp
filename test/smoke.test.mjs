@@ -66,7 +66,7 @@ test('real MCP HTTP server exposes tools and interactive ui resource',async()=>{
    uri:'ui://codeberg-transition/dashboard.html',
   }});
   assert.ok(content.contents?.[0]?.text?.includes('TRANSITION CONSOLE'));
-  const bad=await fetch(target,{headers:{Host:'bad.example'}});
+  const bad=await fetch(target,{headers:{'x-forwarded-for':'198.51.100.12'}});
   assert.equal(bad.status,401,'Untrusted host should never reach MCP');
  }finally{
   server.kill('SIGTERM');
