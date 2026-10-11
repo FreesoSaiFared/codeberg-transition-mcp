@@ -148,6 +148,8 @@ export class Api {
       githubInventoryReady: !!this.c.githubToken,
       codebergReady: !!this.c.codebergToken,
       fullMigrationReady: !!this.c.migrationToken && !!this.c.codebergToken,
+      pushMirrorReady: !!this.c.mirrorToken && !!this.c.codebergToken,
+      pushMirrorTokenLeavesHost: !!this.c.mirrorToken,
       sourceTokenLeavesHost: !!this.c.migrationToken,
       policy: 'https://blog.codeberg.org/protecting-our-floss-commons-from-llms.html',
     };
