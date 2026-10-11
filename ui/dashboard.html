@@ -50,6 +50,12 @@ td:nth-child(2),td:nth-child(3){font-family:var(--font);font-size:11px}
 footer{border-top:1px solid var(--rule);padding-top:12px;margin-top:28px;font:10px var(--font);color:var(--dim)}
 @media(max-width:580px){.metrics{grid-template-columns:1fr 1fr}.metric:nth-child(2){border-right:0}.metric:nth-child(-n+2){border-bottom:1px solid var(--rule)}header{grid-template-columns:1fr}.station{margin-top:14px;justify-self:start}}
 @media(prefers-reduced-motion:no-preference){button{transition:filter .15s}}
+#semantic-source{display:block;width:100%;min-height:175px;resize:vertical;background:var(--white);border:1px solid var(--rule);color:var(--ink);font:11px/1.55 var(--font);padding:13px;margin:9px 0 12px}
+#semantic-target{background:var(--white);border:1px solid var(--rule);color:var(--ink);font:11px var(--font);padding:9px;min-height:37px}
+#semantic-status{white-space:pre-wrap;font:11px/1.55 var(--font);padding:12px 0;color:var(--dim)}
+#semantic-loss{margin:8px 0}
+#semantic-loss .semantic-row{display:grid;grid-template-columns:minmax(120px,2fr) minmax(100px,1fr) minmax(150px,2fr);gap:8px;border-bottom:1px solid var(--rule);padding:8px;font:11px/1.4 var(--font)}
+#semantic-loss .semantic-row:first-child{background:#e2e0d6;font-weight:600}
 </style>
 </head>
 <body>
@@ -102,6 +108,22 @@ footer{border-top:1px solid var(--rule);padding-top:12px;margin-top:28px;font:10
 <div class="actions"><button id="quarry-search">SEARCH VERIFIED SOURCES</button><button id="quarry-upstream" class="secondary">CHECK UPSTREAM DRIFT</button></div>
 <div id="quarry-message" role="status" aria-live="polite">This lookup is read-only. No third-party code is installed automatically.</div>
 <div class="tablewrap"><table><thead><tr><th scope="col">SOURCE</th><th scope="col">APPLICATION</th><th scope="col">LICENSE / PRIORITY</th></tr></thead><tbody id="quarry-results"><tr><td colspan="3">Search the source quarry to inspect implementation evidence.</td></tr></tbody></table></div>
+</section>
+<section class="panel" id="semantic-continuity">
+<div class="panelhead"><h2>06 / SEMANTIC CONTINUITY</h2><div class="eyebrow">AI-ASSISTED REVIEW TRANSLATION</div></div>
+<p class="intro">Translate a change without flattening its meaning. Native fields express what they can; unsupported review evidence stays in a private, checksum-verified sidecar. AI can suggest supplementary explanations but cannot impersonate approval or rewrite source facts.</p>
+<label for="semantic-target"><span class="label">DESTINATION FORGE</span></label>
+<select id="semantic-target"><option value="github">GITHUB</option><option value="forgejo">FORGEJO / CODEBERG</option><option value="gitlab">GITLAB</option><option value="gerrit">GERRIT</option><option value="sourcehut">SOURCEHUT</option><option value="minimal">MINIMAL REVIEW SYSTEM</option></select>
+<label for="semantic-source"><span class="label">SOURCE CHANGE / EVIDENCE JSON</span></label>
+<textarea id="semantic-source" spellcheck="false" aria-describedby="semantic-status"></textarea>
+<div class="actions">
+<button id="semantic-preview">MEASURE SEMANTIC LOSS</button>
+<button id="semantic-ai" class="secondary" disabled>ASK CHATGPT TO REPAIR GAPS</button>
+<button id="semantic-save" class="secondary" disabled>SAVE ORIGINAL EVIDENCE</button>
+</div>
+<div id="semantic-status" aria-live="polite" role="status">Awaiting source change. Example evidence supplied for local inspection only.</div>
+<div id="semantic-loss" role="table" aria-label="Semantic translation gaps"></div>
+<div class="label">LAST EVIDENCE RECEIPT</div><div id="semantic-receipt" class="mono">NO SIDECAR STORED</div>
 </section>
 <footer>CODEBERG TRANSITION MCP · REPOSITORY COPY ONLY · PUBLIC SOURCE <span id="connected">/ DISCONNECTED</span></footer>
 </main>
